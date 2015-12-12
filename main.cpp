@@ -29,6 +29,8 @@
 
 using namespace std;
 
+// matlab data structure copied
+
 struct Node {
 public:
 unsigned int numbranches ;
@@ -39,32 +41,37 @@ double *bounds;
 Node *branches;
 };
 
-int cnt = 0 ;
-Node parent;
-const int num_level = 3;
-const int num_ipvec =  500;
-int num_dict = 1000;
+
+Node parent; // parent node of tree
+const int num_level = 3; // number of levels in the tree
+const int num_ipvec =  500; // number of input elements in input vector
+int num_dict = 1000; // number of dictionary elements used in clustering
+
 double inputs[441*num_ipvec];
-unsigned int num_clusters[num_level] = {10,10,10};
-cl_uint N = 5024;
-int Nt = 5024;
+unsigned int num_clusters[num_level] = {10,10,10}; // clustering across levels
+
+// matlab output files
 
 char *inputfile = "ainput500.mat" ;
 char *dictfile = "10x10x10.mat" ;
 
-int correct  ;
+// supporting variables
+int correct;
 double error2;
-
 int store[num_level] = {1000,100,10};
 int lvlcnt = 0;
 
-void setsize(unsigned int st,unsigned int size, Node &temp)
+cl_uint N = 5024;
+int Nt = 5024;
+int cnt = 0 ;
+
+void setsize(unsigned int st,unsigned int size, Node &temp) 
 {
-	unsigned int numbranchs = size;
-	printf(" test st test = %u ",st);
-	printf(" test numbranches = %u " ,size);
-	printf(" test address = %p ///////////////////////////////////////////////////////////////////////////////////////////// \n",&temp.numbranches);
+	//printf(" test st test = %u ",st);
+	//printf(" test numbranches = %u " ,size);
+	//printf(" test address = %p ///////////////////////////////////////////////////////////////////////////////////////////// \n",&temp.numbranches);
 	
+	unsigned int numbranchs = size;
 	temp.numbranches = numbranchs;
 	temp.dicindx = new double[st];   
 	temp.centroids = new double[441*numbranchs]; 
@@ -73,6 +80,8 @@ void setsize(unsigned int st,unsigned int size, Node &temp)
 	temp.branches = new Node[numbranchs];
 }
   				
+// for mex integration
+
 mxClassID   analyze_class(const mxArray *array_ptr , Node &temp);
 
 void analyze_structure(const mxArray *structure_array_ptr, Node &temp)
@@ -125,8 +134,8 @@ void analyze_double(const mxArray *array_ptr , Node &temp)
 	total_num_of_elements = mxGetNumberOfElements(array_ptr);
   
 	cnt = cnt + 1;
-	mexPrintf ("cnt = %d \n",cnt);  
-	mexPrintf ("total_num_of_elements = %d \n",total_num_of_elements);
+	//mexPrintf ("cnt = %d \n",cnt);  
+	//mexPrintf ("total_num_of_elements = %d \n",total_num_of_elements);
 
 	switch(cnt)
 	{
@@ -235,7 +244,7 @@ mxClassID analyze_class(const mxArray *array_ptr, Node &temp)
 }
 
 
-void pfn_notify(const char *errinfo, const void *private_info, size_t cb, void *user_data) // what is this for ??????
+void pfn_notify(const char *errinfo, const void *private_info, size_t cb, void *user_data) 
 {
 	fprintf(stderr, "OpenCL Error (via pfn_notify): %s\n", errinfo);
 }
@@ -297,22 +306,22 @@ void oclBuildKernel(const char *sourceFileName,
     cl_kernel &kernel,
     const char *flags
     ){
-
+	
   // read in text from source file
-		cl_int    err;
-		struct stat statbuf;  // stat statbuf ??????
-  FILE *fh = fopen(sourceFileName, "r");
-  if (fh == 0){
+	cl_int    err;
+	struct stat statbuf;  
+	FILE *fh = fopen(sourceFileName, "r");
+	if (fh == 0){
     	printf("Failed to open: %s\n", sourceFileName);
     	throw 1;
- }
+	}
 
   
   /* create program from source */
 
   /* get stats for source file */
 
-  stat(sourceFileName, &statbuf); // ???????????????
+  stat(sourceFileName, &statbuf); 
 
   /* read text from source file and add terminator */
 
@@ -354,6 +363,7 @@ void oclBuildKernel(const char *sourceFileName,
 
 }
 
+/* datastructure to ease dyanamic demand based thread allocation */
 struct Reference{
 public:
 cl_uint* input_vec;
@@ -369,14 +379,13 @@ int main(int argc, char** argv){
 	float avgTimePerIteration = 0;
 	float diff = 0;
 	int iter = 0;
-	int num_iter = 50;
+	int num_iter = 1; // set number of iterations
 	cl_uint node_taken[num_level+1][num_ipvec]; 
 	MPI_Init(&argc, &argv);
   
 for( iter = 0; iter < num_iter ; iter++)
 {	
 	// read the .mat file output of the k-means balanced clustered MATLAB code 
-	
 	
 	MATFile *datafile;
 	datafile = matOpen( dictfile, "r");
@@ -410,8 +419,6 @@ for( iter = 0; iter < num_iter ; iter++)
 	level_node[0] = new Node[temp_store]; 
 	level_node[0][0] = parent ;
 			
-	//cout<<"test this? "<<level_node[0][0].dicindx[3]<<"\n";
-	 
 	// copy to level_node for easy access in subsequent code 
 	// one time operation wont effect the runtime
 
@@ -450,8 +457,8 @@ for( iter = 0; iter < num_iter ; iter++)
 	const char *functionName1 = "minimum";
 	int BDIM = 16;
 	char flags[BUFSIZ];
-	sprintf(flags, "-DBDIM=%d", BDIM); // what is this ?????????
-
+	sprintf(flags, "-DBDIM=%d", BDIM); 
+	
 	// bulid kernel : check for syntax errors
 	
 	oclBuildKernel(sourceFileName,
@@ -529,8 +536,8 @@ for( iter = 0; iter < num_iter ; iter++)
 		h_ref = ref ;
 		
 		
-		printf("h_ref test 0 4  main %d \n ", sizeof(h_ref));
-		printf("h_ref test 0 4  main %d \n ", sz_ref);
+		//printf("h_ref test 0 4  main %d \n ", sizeof(h_ref));
+		//printf("h_ref test 0 4  main %d \n ", sz_ref);
 		//printf("h_ref test 1 2 main %d \n ", h_ref[1].input_vec[2]);
 		//printf("h_ref test 0 4  main %d \n ", ref[0].input_vec[4]);
 		//printf("h_ref test 1 2 main %d \n ", ref[1].input_vec[2]);
@@ -578,7 +585,7 @@ for( iter = 0; iter < num_iter ; iter++)
 		//launch kernel			
        	clEnqueueNDRangeKernel(queue, kernel, dim, 0, global, local, 0, (cl_event*)NULL, &event_time);  
 		
-		clEnqueueReadBuffer(queue, c_res, CL_TRUE, 0,sz_res, h_res, 0, 0, 0); // how not necessary how will we refernece it?
+		clEnqueueReadBuffer(queue, c_res, CL_TRUE, 0,sz_res, h_res, 0, 0, 0); 
 		printf("reading ans \n");
       	clFinish(queue);
 		
@@ -622,7 +629,6 @@ for( iter = 0; iter < num_iter ; iter++)
 		//clFinish(queue);		
 		// minimum calculation
 		// count initialize to zero , even the othr two
-		
 		// based on the MMSE determin the next level node to be taken
 		correct  =0 ;
 		error2 = 0;
@@ -698,14 +704,12 @@ for( iter = 0; iter < num_iter ; iter++)
 								
 	for(int i=0 ; i <num_ipvec ; i++)
 	{
-	//	printf("node_taken = %d \n ",node_taken[num_level][i]);
-	
-	
+	printf("node_taken in last level = %d \n ",node_taken[num_level][i]);
 	}
 	
 	double error1 = double((num_ipvec - correct))/double(num_ipvec) ;
-	printf(" correct mapped : %d \n"  , correct );
-	printf(" error : %f \n"  , error1 );
+	//printf(" correct mapped : %d \n"  , correct );
+	//printf(" error : %f \n"  , error1 );
 	printf("avg error : %f \n" , error2);
 
 	

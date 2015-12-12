@@ -24,8 +24,8 @@ __kernel void product(__global double* h_inputvec,__global struct Reference* h_r
 	const int add = (int)(indicator*num_ipvec)/N;
 	unsigned int ipv_size = h_ref[add].num ;
 	
-	printf("indicator = %d sz = %d \n" , indicator, ipv_size);
-	printf("indicator = %d add = %d \n" , indicator, add);
+	//printf("indicator = %d sz = %d \n" , indicator, ipv_size);
+	//printf("indicator = %d add = %d \n" , indicator, add);
 						
 	const int fract = (int)(ipv_size*N/num_ipvec); // fract = no. of compute units
 	int fractn = (int) fract/numb;
@@ -53,7 +53,7 @@ __kernel void product(__global double* h_inputvec,__global struct Reference* h_r
 		int inc = (int) (indicator / numb);
 		tempo = h_ref[add].input_vec[(i*fractn+inc)%ipv_size]; // can be improved
 		
-		printf("centroid = %f input val = %f  tempo = %d element = %d indicator = %d \n" ,centroid[0],h_inputvec[441*tempo],tempo,(i*fractn+inc)%ipv_size,indicator);
+		//printf("centroid = %f input val = %f  tempo = %d element = %d indicator = %d \n" ,centroid[0],h_inputvec[441*tempo],tempo,(i*fractn+inc)%ipv_size,indicator);
 		//printf("h_ref test 0 4 %d \n ", h_ref[0].input_vec[4]);
 		//printf("h_ref test 1 2 %d \n ", h_ref[1].input_vec[2]);
 		
