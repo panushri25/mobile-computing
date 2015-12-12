@@ -10,7 +10,7 @@ Steps in the code
 3) Build a balanced hierarchical shallow tree using the dictionaries (matlab-files)
 4) Use the Shallow tree for searching on CPU-GPU platform (snapdragon)
 
-inorder to establish mex integration between matlab codes and OpenCL codes linking need to be performed
+inorder to establish mex integration between matlab codes and OpenCL codes
 
 make using: (use corresponding folder)
 
