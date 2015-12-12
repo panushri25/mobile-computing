@@ -1,7 +1,6 @@
 //kernel
 #pragma OPENCL EXTENSION cl_khr_fp64: enable
 
-
 struct Node {
 unsigned int numbranches ;
 double *dicindx;

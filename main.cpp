@@ -732,7 +732,6 @@ for( iter = 0; iter < num_iter ; iter++)
 								printf(" %d dict closest to input 1 %f \n",g,level_node[num_level-1][0].centroids[441]);
 								*/		
 
-
  }
  
  
